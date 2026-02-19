@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import api from '../../lib/api';
 import { getUser, type User } from '../../lib/auth';
@@ -192,7 +193,7 @@ export default function DashboardScreen() {
 
       {students.length === 0 ? (
         <View style={styles.emptyCard}>
-          <Text style={{ fontSize: 40, marginBottom: 12 }}>👧</Text>
+          <Ionicons name="people-outline" size={40} color={COLORS.textMuted} style={{ marginBottom: 12 }} />
           <Text style={styles.emptyTitle}>Sin hijos registrados</Text>
           <Text style={styles.emptyText}>Contacta al administrador para asignar estudiantes.</Text>
         </View>
@@ -269,7 +270,7 @@ export default function DashboardScreen() {
                   <View style={styles.attendanceRow}>
                     {hasAbordaje && (
                       <View style={[styles.infoChip, { backgroundColor: COLORS.successBg }]}>
-                        <Text style={styles.chipIcon}>✅</Text>
+                        <Ionicons name="checkmark-circle" size={14} color={COLORS.success} style={{ marginRight: 5 }} />
                         <Text style={[styles.chipText, { color: COLORS.success }]}>
                           Abordaje {new Date(att!.abordaje!).toLocaleTimeString('es-BO', { hour: '2-digit', minute: '2-digit' })}
                         </Text>
@@ -277,7 +278,7 @@ export default function DashboardScreen() {
                     )}
                     {hasDescenso && (
                       <View style={[styles.infoChip, { backgroundColor: COLORS.primaryBgLight }]}>
-                        <Text style={styles.chipIcon}>🏠</Text>
+                        <Ionicons name="home" size={14} color={COLORS.primary} style={{ marginRight: 5 }} />
                         <Text style={[styles.chipText, { color: COLORS.primary }]}>
                           Descenso {new Date(att!.descenso!).toLocaleTimeString('es-BO', { hour: '2-digit', minute: '2-digit' })}
                         </Text>
@@ -291,25 +292,25 @@ export default function DashboardScreen() {
                   {student.ruta ? (
                     <>
                       <View style={styles.infoChip}>
-                        <Text style={styles.chipIcon}>🗺️</Text>
+                        <Ionicons name="map-outline" size={14} color={COLORS.textSecondary} style={{ marginRight: 5 }} />
                         <Text style={styles.chipText}>{student.ruta.nombre}</Text>
                       </View>
                       {student.ruta.vehiculo && (
                         <View style={styles.infoChip}>
-                          <Text style={styles.chipIcon}>🚌</Text>
+                          <Ionicons name="bus-outline" size={14} color={COLORS.textSecondary} style={{ marginRight: 5 }} />
                           <Text style={styles.chipText}>{student.ruta.vehiculo.placa}</Text>
                         </View>
                       )}
                       {student.ruta.vehiculo?.conductor && (
                         <View style={styles.infoChip}>
-                          <Text style={styles.chipIcon}>👤</Text>
+                          <Ionicons name="person-outline" size={14} color={COLORS.textSecondary} style={{ marginRight: 5 }} />
                           <Text style={styles.chipText}>{student.ruta.vehiculo.conductor.nombre}</Text>
                         </View>
                       )}
                     </>
                   ) : (
                     <View style={[styles.infoChip, { backgroundColor: COLORS.warningBg }]}>
-                      <Text style={styles.chipIcon}>⚠️</Text>
+                      <Ionicons name="warning-outline" size={14} color={COLORS.warning} style={{ marginRight: 5 }} />
                       <Text style={[styles.chipText, { color: COLORS.warning }]}>Sin ruta asignada</Text>
                     </View>
                   )}
@@ -317,9 +318,14 @@ export default function DashboardScreen() {
 
                 {/* Botón tracking */}
                 {student.ruta?.vehiculoId && (
-                  <View style={[styles.trackBtn, isActive && styles.trackBtnActive]}>
+                  <View style={[styles.trackBtn, isActive && styles.trackBtnActive, { flexDirection: 'row', alignItems: 'center', gap: 6 }]}>
+                    <Ionicons
+                      name={isActive ? 'location' : 'map-outline'}
+                      size={14}
+                      color={isActive ? COLORS.white : COLORS.primary}
+                    />
                     <Text style={[styles.trackBtnText, isActive && styles.trackBtnTextActive]}>
-                      {isActive ? '📍 Ver ubicacion en vivo' : '🗺️ Ver ruta asignada'}
+                      {isActive ? 'Ver ubicacion en vivo' : 'Ver ruta asignada'}
                     </Text>
                   </View>
                 )}
@@ -455,7 +461,6 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     borderRadius: 8,
   },
-  chipIcon: { fontSize: 12, marginRight: 5 },
   chipText: { fontSize: 12, color: COLORS.textSecondary, fontWeight: '500' },
 
   // Track button
