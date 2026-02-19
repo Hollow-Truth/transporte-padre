@@ -1,5 +1,5 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
-import { Text } from 'react-native';
 
 export default function PadreLayout() {
   return (
@@ -25,21 +25,21 @@ export default function PadreLayout() {
         name="index"
         options={{
           title: 'Mis Hijos',
-          tabBarIcon: () => <Text style={{ fontSize: 22 }}>👧</Text>,
+          tabBarIcon: ({ color }) => <Ionicons name="people" size={22} color={color} />,
         }}
       />
       <Tabs.Screen
         name="attendance"
         options={{
           title: 'Asistencia',
-          tabBarIcon: () => <Text style={{ fontSize: 22 }}>📋</Text>,
+          tabBarIcon: ({ color }) => <Ionicons name="clipboard" size={22} color={color} />,
         }}
       />
       <Tabs.Screen
         name="tracking"
         options={{
           title: 'Tracking',
-          tabBarIcon: () => <Text style={{ fontSize: 22 }}>📍</Text>,
+          tabBarIcon: ({ color }) => <Ionicons name="location" size={22} color={color} />,
           href: null,
         }}
       />
@@ -47,7 +47,7 @@ export default function PadreLayout() {
         name="profile"
         options={{
           title: 'Perfil',
-          tabBarIcon: () => <Text style={{ fontSize: 22 }}>👤</Text>,
+          tabBarIcon: ({ color }) => <Ionicons name="person" size={22} color={color} />,
         }}
       />
     </Tabs>
