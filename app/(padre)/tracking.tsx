@@ -8,8 +8,9 @@ import {
 } from 'react-native';
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import { useLocalSearchParams } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import api from '../../lib/api';
-import { connectSocket, disconnectSocket } from '../../lib/socket';
+import { connectSocket } from '../../lib/socket';
 import { COLORS, SCHOOL } from '../../lib/constants';
 
 interface Position {
@@ -71,6 +72,7 @@ export default function TrackingScreen() {
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState('');
   const mapRef = useRef<MapView>(null);
+  const socketRef = useRef<any>(null);
 
   // Load route and check active trajectory
   useEffect(() => {
@@ -109,8 +111,8 @@ export default function TrackingScreen() {
             } catch {}
           }
         }
-      } catch (error) {
-        console.error('Error loading tracking data:', error);
+      } catch {
+        // error loading tracking data
       } finally {
         setLoading(false);
       }
@@ -130,12 +132,13 @@ export default function TrackingScreen() {
     if (busPosition) coords.push(busPosition);
 
     if (coords.length > 1) {
-      setTimeout(() => {
+      const t = setTimeout(() => {
         mapRef.current?.fitToCoordinates(coords, {
           edgePadding: { top: 60, right: 60, bottom: 60, left: 60 },
           animated: true,
         });
       }, 500);
+      return () => clearTimeout(t);
     }
   }, [route, busPosition]);
 
@@ -143,35 +146,50 @@ export default function TrackingScreen() {
   useEffect(() => {
     if (!vehiculoId) return;
     let mounted = true;
+
+    const onLocationUpdate = (data: any) => {
+      if (!mounted || data.vehiculoId !== vehiculoId) return;
+      const lat = data.location?.lat || data.lat;
+      const lng = data.location?.lng || data.lng;
+      if (lat && lng) {
+        setBusPosition({ latitude: lat, longitude: lng });
+        setLastUpdate(new Date().toLocaleTimeString());
+        setIsActive(true);
+      }
+    };
+    const onTrajectoryStarted = (data: any) => {
+      if (mounted && data.vehiculoId === vehiculoId) setIsActive(true);
+    };
+    const onTrajectoryEnded = (data: any) => {
+      if (mounted && data.vehiculoId === vehiculoId) {
+        setIsActive(false);
+        setBusPosition(null);
+      }
+    };
+
     (async () => {
       try {
         const socket = await connectSocket();
+        socketRef.current = socket;
         socket.emit('join:vehicle', { vehiculoId });
-        socket.on('location:update', (data: any) => {
-          if (!mounted || data.vehiculoId !== vehiculoId) return;
-          const lat = data.location?.lat || data.lat;
-          const lng = data.location?.lng || data.lng;
-          if (lat && lng) {
-            const newPos = { latitude: lat, longitude: lng };
-            setBusPosition(newPos);
-            setLastUpdate(new Date().toLocaleTimeString());
-            setIsActive(true);
-          }
-        });
-        socket.on('trajectory:started', (data: any) => {
-          if (mounted && data.vehiculoId === vehiculoId) setIsActive(true);
-        });
-        socket.on('trajectory:ended', (data: any) => {
-          if (mounted && data.vehiculoId === vehiculoId) {
-            setIsActive(false);
-            setBusPosition(null);
-          }
-        });
-      } catch (err) {
-        console.error('WebSocket error:', err);
+        socket.on('location:update', onLocationUpdate);
+        socket.on('trajectory:started', onTrajectoryStarted);
+        socket.on('trajectory:ended', onTrajectoryEnded);
+      } catch {
+        // WebSocket unavailable - HTTP polling remains active
       }
     })();
-    return () => { mounted = false; disconnectSocket(); };
+
+    return () => {
+      mounted = false;
+      if (socketRef.current) {
+        socketRef.current.emit('leave:vehicle', { vehiculoId });
+        socketRef.current.off('location:update', onLocationUpdate);
+        socketRef.current.off('trajectory:started', onTrajectoryStarted);
+        socketRef.current.off('trajectory:ended', onTrajectoryEnded);
+        // NOT calling disconnectSocket() - socket is shared singleton
+      }
+    };
   }, [vehiculoId]);
 
   if (loading) {
@@ -186,7 +204,7 @@ export default function TrackingScreen() {
   if (!vehiculoId || !rutaId) {
     return (
       <View style={styles.center}>
-        <Text style={{ fontSize: 50, marginBottom: 16 }}>📍</Text>
+        <Ionicons name="location" size={50} color={COLORS.textMuted} style={{ marginBottom: 16 }} />
         <Text style={styles.emptyTitle}>Sin datos de tracking</Text>
         <Text style={styles.emptyText}>Selecciona un hijo desde la pantalla principal.</Text>
       </View>
@@ -274,7 +292,7 @@ export default function TrackingScreen() {
             description={isActive ? 'En viaje' : ''}
           >
             <View style={styles.busMarker}>
-              <Text style={styles.busEmoji}>🚌</Text>
+              <Ionicons name="bus" size={20} color={COLORS.primary} />
             </View>
           </Marker>
         )}
@@ -348,7 +366,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
-  busEmoji: { fontSize: 20 },
   infoPanel: {
     backgroundColor: '#fff',
     padding: 16,
