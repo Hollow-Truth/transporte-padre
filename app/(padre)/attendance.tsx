@@ -10,6 +10,7 @@ import {
   Alert,
   TextInput,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import api from '../../lib/api';
 import { getUser } from '../../lib/auth';
 import { COLORS, SHADOWS } from '../../lib/constants';
@@ -171,7 +172,7 @@ export default function AttendanceScreen() {
 
       {students.length === 0 ? (
         <View style={styles.emptyCard}>
-          <Text style={{ fontSize: 40, marginBottom: 12 }}>📋</Text>
+          <Ionicons name="clipboard-outline" size={40} color={COLORS.textMuted} style={{ marginBottom: 12 }} />
           <Text style={styles.emptyTitle}>Sin hijos registrados</Text>
         </View>
       ) : (
@@ -212,7 +213,7 @@ export default function AttendanceScreen() {
                 <Text style={styles.todayLabel}>Hoy</Text>
                 <View style={styles.todayRow}>
                   <View style={[styles.statusChip, todayAbordaje ? styles.statusActive : styles.statusInactive]}>
-                    <Text style={styles.statusIcon}>{todayAbordaje ? '✅' : '⏳'}</Text>
+                    <Ionicons name={todayAbordaje ? 'checkmark-circle' : 'time-outline'} size={14} color={todayAbordaje ? COLORS.success : COLORS.textMuted} style={{ marginRight: 6 }} />
                     <Text style={[styles.statusText, todayAbordaje && { color: COLORS.success }]}>
                       {todayAbordaje
                         ? `Abordó ${new Date(todayAbordaje.timestamp).toLocaleTimeString('es-BO', { hour: '2-digit', minute: '2-digit' })}`
@@ -220,7 +221,7 @@ export default function AttendanceScreen() {
                     </Text>
                   </View>
                   <View style={[styles.statusChip, todayDescenso ? styles.statusActive : styles.statusInactive]}>
-                    <Text style={styles.statusIcon}>{todayDescenso ? '✅' : '⏳'}</Text>
+                    <Ionicons name={todayDescenso ? 'checkmark-circle' : 'time-outline'} size={14} color={todayDescenso ? COLORS.success : COLORS.textMuted} style={{ marginRight: 6 }} />
                     <Text style={[styles.statusText, todayDescenso && { color: COLORS.success }]}>
                       {todayDescenso
                         ? `Bajó ${new Date(todayDescenso.timestamp).toLocaleTimeString('es-BO', { hour: '2-digit', minute: '2-digit' })}`
@@ -339,9 +340,7 @@ export default function AttendanceScreen() {
                   <Text style={styles.historyLabel}>Últimos registros</Text>
                   {studentAttendance.slice(0, 6).map((rec) => (
                     <View key={rec.id} style={styles.historyRow}>
-                      <Text style={styles.historyIcon}>
-                        {rec.evento === 'abordaje' ? '🚌' : '🏠'}
-                      </Text>
+                      <Ionicons name={rec.evento === 'abordaje' ? 'bus' : 'home'} size={14} color={COLORS.textSecondary} style={{ marginRight: 8 }} />
                       <Text style={styles.historyText}>
                         {rec.evento === 'abordaje' ? 'Abordó' : 'Descendió'}{' '}
                         {new Date(rec.timestamp).toLocaleDateString('es-BO')}{' '}
@@ -350,9 +349,7 @@ export default function AttendanceScreen() {
                           minute: '2-digit',
                         })}
                       </Text>
-                      <Text style={styles.historyGeo}>
-                        {rec.validadoGeofencing ? '✅' : '⚠️'}
-                      </Text>
+                      <Ionicons name={rec.validadoGeofencing ? 'checkmark-circle' : 'warning-outline'} size={12} color={rec.validadoGeofencing ? COLORS.success : COLORS.warning} />
                     </View>
                   ))}
                 </View>
@@ -438,7 +435,6 @@ const styles = StyleSheet.create({
   },
   statusActive: { backgroundColor: COLORS.successBg },
   statusInactive: { backgroundColor: COLORS.borderLight },
-  statusIcon: { fontSize: 14, marginRight: 6 },
   statusText: { fontSize: 12, color: COLORS.textSecondary, fontWeight: '600' },
 
   // Absences
@@ -545,7 +541,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 4,
   },
-  historyIcon: { fontSize: 14, marginRight: 8 },
   historyText: { flex: 1, fontSize: 12, color: COLORS.text },
-  historyGeo: { fontSize: 12 },
 });
