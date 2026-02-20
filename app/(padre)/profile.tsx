@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   ScrollView,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import api from '../../lib/api';
 import { getUser, logout, User } from '../../lib/auth';
@@ -85,9 +86,10 @@ export default function ProfileScreen() {
 
       {/* Hijos */}
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>
-          👧 Mis Hijos ({students.length})
-        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+          <Ionicons name="people-outline" size={18} color="#1e3a8a" />
+          <Text style={styles.cardTitle}>Mis Hijos ({students.length})</Text>
+        </View>
         {students.length > 0 ? (
           students.map((s) => (
             <View key={s.id} style={styles.studentRow}>
@@ -185,7 +187,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: '#1e293b',
-    marginBottom: 12,
   },
   studentRow: {
     flexDirection: 'row',
